@@ -268,7 +268,7 @@ export default function Lab1() {
           to get dummy text<br/>
           <h4>Anchor Github tag</h4>
           Please
-          <a id="wd-github" href="https://www.lipsum.com"> click here </a>
+          <a id="wd-github" href="https://github.com/manhasv/Web_Dev_Lab1/tree/a1"> click here </a>
           to get to the github<br/>
         </div>
         
