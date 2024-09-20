@@ -108,7 +108,7 @@ export default function AssignmentEditor() {
         <br/>
         <tr>
           <td align="left" valign="top">
-            _________________<br/>
+            ___________________<br/>
             <br/>
           <button id="wd-all-good"  type="button">
               Cancel
