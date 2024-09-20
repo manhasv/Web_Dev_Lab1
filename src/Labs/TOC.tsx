@@ -7,6 +7,7 @@ export default function TOC() {
         <li><Link id="wd-a2" to="/Labs/Lab2">Lab 2</Link></li>
         <li><Link id="wd-a3" to="/Labs/Lab3">Lab 3</Link></li>
         <li><Link id="wd-a4" to="/Kanbas">Kanbas</Link></li>
+        <li><Link id="wd-github" to="https://github.com/manhasv/Web_Dev/tree/a1">Manh Tran's github link</Link></li>
       </ul>
     );
   }
