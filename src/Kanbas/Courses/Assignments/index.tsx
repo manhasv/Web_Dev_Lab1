@@ -32,7 +32,7 @@ export default function Assignments() {
                 <div className="me-3" style={{ whiteSpace: 'nowrap' }}>
                   <a className="wd-assignment-link"
                     href="#/Kanbas/Courses/1234/Assignments/123">
-                    <span className="bold-text">A1</span>
+                    <span className="text-decoration-none text-dark bold-text">A1</span>
                   </a>
                   <span className="d-block">
                     <span style={{ color: 'red' }}>Multiple Modules </span> |
@@ -55,7 +55,7 @@ export default function Assignments() {
                 <div className="me-3" style={{ whiteSpace: 'nowrap' }}>
                   <a className="wd-assignment-link"
                     href="#/Kanbas/Courses/1234/Assignments/123">
-                    <span className="bold-text">A2</span>
+                    <span className="text-decoration-none text-dark bold-text">A2</span>
                   </a>
                   <span className="d-block">
                     <span style={{ color: 'red' }}>Multiple Modules </span> |
@@ -78,7 +78,7 @@ export default function Assignments() {
                 <div className="me-3" style={{ whiteSpace: 'nowrap' }}>
                   <a className="wd-assignment-link"
                     href="#/Kanbas/Courses/1234/Assignments/123">
-                    <span className="bold-text">A3</span>
+                    <span className="text-decoration-none text-dark bold-text">A3</span>
                   </a>
                   <span className="d-block">
                     <span style={{ color: 'red' }}>Multiple Modules </span> |

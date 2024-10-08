@@ -110,17 +110,17 @@ export default function AssignmentEditor() {
                 <div className="mb-4">
                 </div>
                 <div className="mb-4">
-                  <label htmlFor="wd-due-date" className="form-label">Due</label>
+                  <label htmlFor="wd-due-date" className="form-label"><strong>Due</strong></label>
                   <input type="date" id="wd-due-date" className="form-control" value="2024-05-13" />
                 </div>
                 <div className="row mb-4">
                   <div className="col">
-                    <label htmlFor="wd-available-from" className="form-label">Available From</label>
+                    <label htmlFor="wd-available-from" className="form-label"><strong>Available From</strong></label>
                     <input type="date" id="wd-available-from" className="form-control" value="2024-05-06" />
                   </div>
 
                   <div className="col">
-                    <label htmlFor="wd-available-until" className="form-label">Until</label>
+                    <label htmlFor="wd-available-until" className="form-label"><strong>Until</strong></label>
                     <input type="date" id="wd-available-until" className="form-control" value="2024-05-20" />
                   </div>
                 </div>
