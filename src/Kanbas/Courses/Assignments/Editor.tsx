@@ -1,12 +1,18 @@
 import React from 'react';
 import { FaAngleDown } from 'react-icons/fa';
 import { FaXmark } from 'react-icons/fa6';
+import { useParams } from "react-router";
+import * as db from "../../Database";
 export default function AssignmentEditor() {
+  
+  const { aid } = useParams();
+  const assignments = db.assignment;
+  const assignment = assignments.find((assignment) => assignment._id === aid);
   return (
     <div id="wd-assignments-editor" className="container mt-4">
       <div className="mb-4">
         <label htmlFor="wd-name" className="form-label">Assignment Name</label>
-        <input id="wd-name" value="A1 - ENV + HTML" className="form-control" />
+        <input id="wd-name" value={assignment?.title} className="form-control" />
       </div>
 
       <div className="mb-4">
@@ -16,15 +22,15 @@ export default function AssignmentEditor() {
           className="form-control"
           rows={9}
           defaultValue={`
-          The assignment is available online. Submit a link to the landing page of your 
-          Web application running on Netlify.
-          
-          The landing page should include the following:
-          - Your full name and section
-          - Links to each of the lab assignments
-          - Link to the Kanbas application
-          - Links to all relevant source code repositories
-          The Kanbas application should include a link to navigate back to the landing page.`}
+          ${assignment?.description? assignment.description : 
+          "The assignment is available online. Submit a link to the landing page of your" +
+          "Web application running on Netlify." +
+          "The landing page should include the following:" +
+          "- Your full name and section" +
+          "- Links to each of the lab assignments" +
+          "- Link to the Kanbas application" +
+          "- Links to all relevant source code repositories" +
+          "The Kanbas application should include a link to navigate back to the landing page"}`}
         />
       </div>
 

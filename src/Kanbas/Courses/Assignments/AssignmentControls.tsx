@@ -1,10 +1,9 @@
 import { FaPlus } from "react-icons/fa6";
 import { FaSearch } from "react-icons/fa";
+
 export default function AssignmentControls() {
     return (
       <div id="wd-assignment-controls" className="d-flex justify-content-between align-items-center">
-        
-        {/* Search Bar on the left */}
         <form className="d-flex me-1" role="search" style={{ width: '700px', height: '50px' }}>
         <div className="input-group">
           <div className="input-group-text">
