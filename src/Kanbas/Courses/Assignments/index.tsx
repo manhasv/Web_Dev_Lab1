@@ -43,10 +43,13 @@ export default function Assignments() {
                     </a>
                     <span className="d-block">
                       <span style={{ color: 'red' }}>Multiple Modules </span> |
-                      <strong> Not available until </strong> | May 13 at 12am |
+                      <strong> Not available until </strong> | 
+                      {assignment.availableFrom ? assignment.availableFrom : " May 13 at 12am"} |
                       </span>
                     <span className="d-block">
-                      <strong> Due </strong> May 15 at 12am | 100pts
+                      <strong> Due </strong> 
+                      {assignment.due ? assignment.due : " May 30 at 12am"} | 
+                      {` ${assignment.points ? assignment.points : 100} pts`}
                       </span>
                   </div>
                   <div className="ms-auto">

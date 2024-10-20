@@ -39,7 +39,7 @@ export default function AssignmentEditor() {
           <label htmlFor="wd-points" className="form-label me-2">Points</label>
           <input
             id="wd-points"
-            value={100}
+            value={assignment?.points? assignment.points : 100}
             className="form-control" 
             style={{ width: '900px' }} />
         </div>
@@ -117,17 +117,17 @@ export default function AssignmentEditor() {
                 </div>
                 <div className="mb-4">
                   <label htmlFor="wd-due-date" className="form-label"><strong>Due</strong></label>
-                  <input type="date" id="wd-due-date" className="form-control" value="2024-05-13" />
+                  <input type="date" id="wd-due-date" className="form-control" value={assignment?.dueDate? assignment.dueDate : "05-13-2024"} />
                 </div>
                 <div className="row mb-4">
                   <div className="col">
                     <label htmlFor="wd-available-from" className="form-label"><strong>Available From</strong></label>
-                    <input type="date" id="wd-available-from" className="form-control" value="2024-05-06" />
+                    <input type="date" id="wd-available-from" className="form-control" value={assignment?.availableDate? assignment.availableDate : "05-13-2024"}  />
                   </div>
 
                   <div className="col">
                     <label htmlFor="wd-available-until" className="form-label"><strong>Until</strong></label>
-                    <input type="date" id="wd-available-until" className="form-control" value="2024-05-20" />
+                    <input type="date" id="wd-available-until" className="form-control" value={assignment?.untilDate? assignment.untilDate : "05-13-2024"} />
                   </div>
                 </div>
               </div>
@@ -136,8 +136,13 @@ export default function AssignmentEditor() {
         </div>
 
       <div className="d-flex justify-content-end">
-        <button type="button" className="btn btn-secondary me-2">Cancel</button>
-        <button type="button" className="btn btn-danger">Save</button>
+        <a href={`#/Kanbas/Courses/${assignment?.course? assignment.course : "1234"}/Assignments/`}>
+          <button type="button" className="btn btn-secondary me-2">Cancel</button>
+        </a>
+        <a href={`#/Kanbas/Courses/${assignment?.course? assignment.course : "1234"}/Assignments/`}>
+         <button type="button" className="btn btn-danger">Save</button>
+        </a>
+        
       </div>
     </div>
   );
