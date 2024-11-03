@@ -1,95 +1,139 @@
-import { useParams } from "react-router";
-import * as db from "../../Database";
+import { BsGripVertical, BsPlus, BsSearch } from "react-icons/bs";
+import { FaRegEdit, FaTrash } from "react-icons/fa";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useSelector, useDispatch } from "react-redux";
+import { deleteAssignment } from "./reducer";
 import AssignmentControls from "./AssignmentControls";
-import { BsGripVertical, BsPlus } from "react-icons/bs";
-import LessonControlButtons from "../Modules/LessonControlButtons";
-import { IoEllipsisVertical } from "react-icons/io5";
-import { MdAssignment } from 'react-icons/md'; 
+
 export default function Assignments() {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<string | null>(null);
+
   const { cid } = useParams();
-  const assignment = db.assignment;
-    return (
-      <div>
-        <AssignmentControls /><br /><br /><br /><br />
-        <div id="wd-assignment-page">
-          <ul id="wd-assignment" className="list-group rounded-0">
-          <li className="wd-assignment list-group-item p-0 mb-5 fs-5 border-gray">
-            <div id="wd-assignments-title" className="wd-title p-3 ps-2 d-flex justify-content-between align-items-center" style={{ backgroundColor: '#e0e0e0' }}>
-                <div>
-                  <BsGripVertical className="me-2 fs-3" />
-                  <strong>ASSIGNMENTS</strong>
-                </div>
-                <div className="float-end">
-                  <span className="badge rounded-pill border border-secondary text-dark me-3" style={{ backgroundColor: '#e0e0e0' }}>
-                    40% of Total
-                  </span>
-                  <BsPlus size={24} />
-                  <IoEllipsisVertical className="fs-4" />
-                </div>
-            </div>
-              {assignment
-              .filter((assignment: any) => assignment.course === cid)
-              .map((assignment: any) => (
-                <ul className="wd-assignment-list list-group rounded-0">
-                  <li className="wd-assignment-list-item list-group-item p-3 ps-1">
-                <div className="d-flex align-items-center">
-                  <BsGripVertical className="me-2 fs-3" />
-                  <MdAssignment className="me-2 fs-3 green-icon" />
-                  
-                  <div className="me-3" style={{ whiteSpace: 'nowrap' }}>
-                    <a className="wd-assignment-link"
-                      href={`#/Kanbas/Courses/${assignment.course}/Assignments/${assignment._id}`}>
-                      <span className="text-decoration-none text-dark bold-text"> {assignment.title} </span>
-                    </a>
-                    <span className="d-block">
-                      <span style={{ color: 'red' }}>Multiple Modules </span> |
-                      <strong> Not available until </strong> | 
-                      {assignment.availableFrom ? assignment.availableFrom : " May 13 at 12am"} |
-                      </span>
-                    <span className="d-block">
-                      <strong> Due </strong> 
-                      {assignment.due ? assignment.due : " May 30 at 12am"} | 
-                      {` ${assignment.points ? assignment.points : 100} pts`}
-                      </span>
-                  </div>
-                  <div className="ms-auto">
-                    <LessonControlButtons />
-                  </div>
-                </div>        
-              </li>
-                </ul>
-              ))}
-          </li>
-          </ul>
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const assignments = useSelector((state: any) => state.assignmentsReducer?.assignments ?? []);
+  const filteredAssignments = assignments.filter((assignment: any) => assignment.course === cid);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
+
+
+  const confirmDelete = (assignmentId: string) => {
+    setAssignmentToDelete(assignmentId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = () => {
+    if (assignmentToDelete) {
+      dispatch(deleteAssignment(assignmentToDelete));
+      setAssignmentToDelete(null);
+      setShowDeleteDialog(false);
+    }
+  };
+
+
+  return (
+    <div id="wd-assignments">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="input-group" style={{ maxWidth: "300px" }}>
+          <span className="input-group-text bg-white">
+            <BsSearch />
+          </span>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search..."
+            style={{ boxShadow: "none" }}
+          />
+        </div>
+        <div className="d-inline-flex">
+          <button className="btn btn-secondary me-2">
+            <BsPlus className="me-1" /> Group
+          </button>
+          {isFaculty && (
+            <button className="btn btn-danger text-white" onClick={() => navigate(`/Kanbas/Courses/${cid}/Assignments/New`)}>
+              <BsPlus className="me-1" /> Assignment
+            </button>
+          )}
         </div>
       </div>
-      
-  );}
 
-  /*
-
-              <li className="wd-assignment-list-item list-group-item p-3 ps-1">
-                <div className="d-flex align-items-center">
+      <ul className="mt-2 list-group rounded-0 w-100">
+        <li className="wd-assignments list-group-item p-0 mb-5 fs-5 border-gray">
+          <div className="wd-title p-3 ps-0 bg-secondary d-flex justify-content-between align-items-center">
+            <div className="d-inline">
+            <div>
+              <BsGripVertical className="me-2 fs-3" />
+              <strong>ASSIGNMENTS</strong>
+            </div>
+            </div>
+            
+          </div>
+            <ul className="wd-assignments-list list-group rounded-0">
+              {filteredAssignments.map((assignment: any) => (
+                <li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
                   <BsGripVertical className="me-2 fs-3" />
-                  <MdAssignment className="me-2 fs-3 green-icon" />
-                  
-                  <div className="me-3" style={{ whiteSpace: 'nowrap' }}>
-                    <a className="wd-assignment-link"
-                      href="#/Kanbas/Courses/1234/Assignments/123">
-                      <span className="text-decoration-none text-dark bold-text">A1</span>
+                  <FaRegEdit className="me-4 text-success fs-5" />
+                  <div className="flex-grow-1">
+                    <a
+                      className="fw-bold text-dark text-decoration-none"
+                      href={`#/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}
+                    >
+                      {assignment.title}
                     </a>
+                    <div>
                     <span className="d-block">
-                      <span style={{ color: 'red' }}>Multiple Modules </span> |
-                      <strong> Not available until </strong> | May 13 at 12am |
-                      </span>
-                    <span className="d-block">
-                      <strong> Due </strong> May 15 at 12am | 100pts
-                      </span>
+                      <span className="text-danger me-2">Multiple Modules</span>
+                      <span className="me-2">|</span>
+                      <strong className="me-2">Not available until</strong>
+                      <span className="me-2">{assignment.availableDate.slice(0, 10)} at 12:00am</span>
+                    </span>
+                      <span className="me-2">|</span>
+                      <strong className="me-2">Due</strong>
+                      <span className="me-2">{assignment.dueDate.slice(0, 10)} at 11:59pm</span>
+                      <span className="me-2">|</span>
+                      <span className="me-2">{assignment.points} pts</span>
+                    </div>
                   </div>
-                  <div className="ms-auto">
-                    <LessonControlButtons />
-                  </div>
-                </div>        
-              </li>
-  */
-  
+                  {isFaculty && 
+                  <div className="float-end d-flex align-items-center">
+                    <FaTrash
+                      className="text-danger me-2 mb-1"
+                      onClick={() => confirmDelete(assignment._id)}
+                      title="Delete Assignment"
+                      style={{ cursor: "pointer" }}
+                    />
+                  </div>}
+                </li>
+              ))}
+            </ul>
+        </li>
+      </ul>
+      {showDeleteDialog && (
+        <div className="modal fade show d-block" tabIndex={-1}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Assignment Deletion</h5>
+                <button type="button" className="btn-close" onClick={() => setShowDeleteDialog(false)} />
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to remove this assignment?</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteDialog(false)}>
+                  No
+                </button>
+                <button type="button" className="btn btn-danger" onClick={handleDelete}>
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
