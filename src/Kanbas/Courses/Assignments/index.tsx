@@ -33,7 +33,6 @@ export default function Assignments() {
     }
   };
 
-
   return (
     <div id="wd-assignments">
       <div className="d-flex justify-content-between align-items-center mb-3">

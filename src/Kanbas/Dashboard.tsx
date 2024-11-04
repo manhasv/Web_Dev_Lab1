@@ -43,11 +43,9 @@ export default function Dashboard({
   };
 
   const navigateToCourse = (courseId: string) => {
-    // If the user is a faculty, allow navigation to any course
     if (isFaculty) {
       navigate(`/Kanbas/Courses/${courseId}/Home`);
     } else {
-      // For students, check if they are enrolled before navigating
       const isEnrolled = enrollments.some(
         (enrollment: { user: any; course: string }) =>
           enrollment.user === currentUser._id && enrollment.course === courseId
@@ -94,9 +92,7 @@ export default function Dashboard({
       {!isFaculty && (
         <button
           className="btn btn-info float-end"
-          onClick={() => dispatch(toggleViewAllCourses())}
-        >
-          {/* {viewAllCourses ? "Show Enrolled Courses" : "Show All Courses"} */}
+          onClick={() => dispatch(toggleViewAllCourses())}>
           Enrollments
         </button>
       )}

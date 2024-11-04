@@ -34,4 +34,4 @@ const enrollmentsSlice = createSlice({
 });
 
 export const { toggleViewAllCourses, enroll, unenroll } = enrollmentsSlice.actions;
-export default enrollmentsSlice.reducer;
+export default enrollmentsSlice.reducer
