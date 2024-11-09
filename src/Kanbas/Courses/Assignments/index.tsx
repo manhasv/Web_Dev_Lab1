@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
 import { deleteAssignment } from "./reducer";
-import AssignmentControls from "./AssignmentControls";
 
 export default function Assignments() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
