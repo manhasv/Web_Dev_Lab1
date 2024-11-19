@@ -1,9 +1,11 @@
 import { BsGripVertical, BsPlus, BsSearch } from "react-icons/bs";
 import { FaRegEdit, FaTrash } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
-import { deleteAssignment } from "./reducer";
+import { setAssignments, deleteAssignment } from "./reducer";
+import * as coursesClient from "../client";
+import * as assignmentsClient from "./client";
 
 export default function Assignments() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -14,7 +16,6 @@ export default function Assignments() {
   const dispatch = useDispatch();
 
   const assignments = useSelector((state: any) => state.assignmentsReducer?.assignments ?? []);
-  const filteredAssignments = assignments.filter((assignment: any) => assignment.course === cid);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
 
@@ -24,13 +25,23 @@ export default function Assignments() {
     setShowDeleteDialog(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (assignmentToDelete) {
+      await assignmentsClient.deleteAssignment(assignmentToDelete);
       dispatch(deleteAssignment(assignmentToDelete));
       setAssignmentToDelete(null);
       setShowDeleteDialog(false);
     }
   };
+
+  const fetchAssignments = async () => {
+    const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
+    dispatch(setAssignments(assignments));
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
 
   return (
     <div id="wd-assignments">
@@ -62,41 +73,46 @@ export default function Assignments() {
         <li className="wd-assignments list-group-item p-0 mb-5 fs-5 border-gray">
           <div className="wd-title p-3 ps-0 bg-secondary d-flex justify-content-between align-items-center">
             <div className="d-inline">
-            <div>
-              <BsGripVertical className="me-2 fs-3" />
-              <strong>ASSIGNMENTS</strong>
+              <div>
+                <BsGripVertical className="me-2 fs-3" />
+                <strong>ASSIGNMENTS</strong>
+              </div>
             </div>
-            </div>
-            
+
           </div>
-            <ul className="wd-assignments-list list-group rounded-0">
-              {filteredAssignments.map((assignment: any) => (
-                <li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
-                  <BsGripVertical className="me-2 fs-3" />
-                  <FaRegEdit className="me-4 text-success fs-5" />
-                  <div className="flex-grow-1">
-                    <a
-                      className="fw-bold text-dark text-decoration-none"
-                      href={`#/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}
-                    >
-                      {assignment.title}
-                    </a>
-                    <div>
+          <ul className="wd-assignments-list list-group rounded-0">
+            {assignments.map((assignment: any) => (
+              <li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
+                <BsGripVertical className="me-2 fs-3" />
+                <FaRegEdit className="me-4 text-success fs-5" />
+                <div className="flex-grow-1">
+                  <a
+                    className="fw-bold text-dark text-decoration-none"
+                    href={isFaculty ? `#/Kanbas/Courses/${cid}/Assignments/${assignment._id}` : undefined}
+                    onClick={(e) => {
+                      if (!isFaculty) {
+                        e.preventDefault(); // Prevents navigation if the user is not an instructor
+                      }
+                    }}
+                    style={{ cursor: isFaculty ? 'pointer' : 'default' }}>
+                    {assignment.title}
+                  </a>
+                  <div>
                     <span className="d-block">
                       <span className="text-danger me-2">Multiple Modules</span>
                       <span className="me-2">|</span>
                       <strong className="me-2">Not available until</strong>
-                    
+
                       <span className="me-2">{assignment.availableDate ? assignment.availableDate.slice(0, 10) : "2024-05-10"} at 12:00am</span>
                     </span>
-                      <span className="me-2">|</span>
-                      <strong className="me-2">Due</strong>
-                      <span className="me-2">{assignment.dueDate ? assignment.dueDate.slice(0, 10): "2024-05-30"} at 11:59pm</span>
-                      <span className="me-2">|</span>
-                      <span className="me-2">{assignment.points? assignment.points : 100} pts</span>
-                    </div>
+                    <span className="me-2">|</span>
+                    <strong className="me-2">Due</strong>
+                    <span className="me-2">{assignment.dueDate ? assignment.dueDate.slice(0, 10) : "2024-05-30"} at 11:59pm</span>
+                    <span className="me-2">|</span>
+                    <span className="me-2">{assignment.points ? assignment.points : 100} pts</span>
                   </div>
-                  {isFaculty && 
+                </div>
+                {isFaculty &&
                   <div className="float-end d-flex align-items-center">
                     <FaTrash
                       className="text-danger me-2 mb-1"
@@ -105,9 +121,9 @@ export default function Assignments() {
                       style={{ cursor: "pointer" }}
                     />
                   </div>}
-                </li>
-              ))}
-            </ul>
+              </li>
+            ))}
+          </ul>
         </li>
       </ul>
       {showDeleteDialog && (

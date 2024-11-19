@@ -2,14 +2,17 @@ import { FaXmark } from 'react-icons/fa6';
 import { useNavigate, useParams } from "react-router";
 import * as db from "../../Database";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from 'react';
-import { addAssignment, updateAssignment } from './reducer';
+import { useEffect, useState } from 'react';
+import { addAssignment, setAssignments, updateAssignment } from './reducer';
 import { Link } from 'react-router-dom';
+import * as coursesClient from "../client";
+import * as assignmentsClient from "./client";
+
 export default function AssignmentEditor(
   //{ assignmentName, setAssignmentName, addAssignment }:
   //{ assignmentName: string; setAssignmentName: (title: string) => void; addAssignment: () => void; }
 ) {
-  
+
   const { cid, aid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -17,16 +20,17 @@ export default function AssignmentEditor(
 
   const assignmentData = assignments.find((a: any) => a._id === aid) || {
     title: "",
+    course: cid,
     description: "",
     points: 0,
     dueDate: "",
     availableDate: "",
-    course: cid,
   };
 
   const [assignment, setAssignment] = useState(assignmentData);
 
-  const handleSave = () => {
+
+  const handleSave = async () => {
     console.log("Trying to save", cid);
     console.log("Trying to save", aid);
     if (!cid) {
@@ -35,21 +39,27 @@ export default function AssignmentEditor(
     }
 
     if (!aid || aid == "New") {
+      const newAssignment = { ...assignment, course: cid };
       console.log("Adding assignment", assignment);
-      dispatch(addAssignment({ ...assignment, course: cid }));
+      await coursesClient.createAssignmentForCourse(cid, newAssignment);
+      dispatch(addAssignment(newAssignment));
+      //wait fetchAssignments();
     } else {
       console.log("Updating assignment", assignment);
+      await assignmentsClient.updateAssignment({ ...assignment, _id: aid, course: cid });
       dispatch(updateAssignment({ ...assignment, _id: aid, course: cid }));
+      //await fetchAssignments();
     }
 
     navigate(`/Kanbas/Courses/${cid}/Assignments`);
     console.log("Assignment saved", assignments);
   };
 
+
   const handleChange = (field: string, value: string) => {
     setAssignment({ ...assignment, [field]: value });
   };
-  
+
   return (
     <div id="wd-assignments-editor" className="container mt-4">
       <div className="mb-4">

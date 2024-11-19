@@ -1,6 +1,6 @@
 // Quizz.tsx
 
-import { BsPlus, BsSearch } from "react-icons/bs";
+import { BsGripVertical, BsPlus, BsSearch } from "react-icons/bs";
 import { useNavigate, useParams } from "react-router";
 import { useSelector } from "react-redux";
 import QuizItem from "./QuizItem"; // Import the QuizItem component
@@ -34,7 +34,7 @@ export default function Quizz() {
               className="btn btn-danger text-white"
               onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/New`)}
             >
-              <BsPlus className="me-1" /> New Quiz
+              <BsPlus className="me-1" /> Quiz
             </button>
           )}
         </div>
@@ -44,7 +44,8 @@ export default function Quizz() {
         <li className="wd-quizzes list-group-item p-0 mb-5 fs-5 border-gray">
           <div className="wd-title p-3 ps-0 bg-secondary d-flex justify-content-between align-items-center">
             <div className="d-inline">
-              <strong>Course Quizzes</strong>
+              <BsGripVertical className="me-2 fs-3" />
+              <strong>Assignment Quizzes</strong>
             </div>
           </div>
           <ul className="wd-quizzes-list list-group rounded-0">
