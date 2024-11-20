@@ -1,11 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { setEnrollments, enroll, unenroll } from "./Enrollment/reducer";
+import { enroll, setEnrollments, unenroll } from "./Enrollment/reducer";
 import { useDispatch, useSelector } from "react-redux";
-import * as courseClient from "./Courses/client";
-import * as enrollmentsClient from "./Enrollment/client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import * as userClient from "./Account/client";
+import * as enrollmentClient from "./Enrollment/client";
 
 export default function Dashboard({
+  allCourses,
   courses,
   course,
   setCourse,
@@ -13,6 +14,7 @@ export default function Dashboard({
   deleteCourse,
   updateCourse,
 }: {
+  allCourses: any[];
   courses: any[];
   course: any;
   setCourse: (course: any) => void;
@@ -23,73 +25,43 @@ export default function Dashboard({
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
   const [viewAllCourses, setViewAllCourses] = useState(false);
-  const [allCourses, setAllCourses] = useState<any[]>([]);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const isFaculty = currentUser?.role === "FACULTY";
-  const displayedCourses = isFaculty ? allCourses : viewAllCourses ? allCourses : courses;
 
-  // Helper function to determine if the current user is enrolled in a specific course
-  const isEnrolledInCourse = (courseId: string) => {
-    return enrollments.some(
-      (enrollment: { user: any; course: string }) =>
-        enrollment.user === currentUser._id && enrollment.course === courseId
-    );
+  const handleEnrollToggle = async (courseId: string, enrolled: boolean) => {
+    if (enrolled) {
+      await enrollmentClient.unenrollUserFromCourse(currentUser._id, courseId);
+      dispatch(unenroll({ user: currentUser._id, course: courseId }));
+    } else {
+      await enrollmentClient.enrollUserInCourse(currentUser._id, courseId);
+      dispatch(enroll({ user: currentUser._id, course: courseId }));
+    }
   };
 
-  const fetchCourses = useCallback(async () => {
+  const fetchEnrollments = async () => {
     try {
-      const fetchedCourses = await courseClient.fetchAllCourses();
-      setAllCourses(fetchedCourses);
+      const enrollments = await userClient.fetchEnrollments();
+      dispatch(setEnrollments(enrollments));
     } catch (error) {
       console.error(error);
     }
-  }, []);
-
-  const fetchEnrollments = useCallback(async () => {
-    try {
-      const enrollments = await enrollmentsClient.fetchEnrollmentsForCurrentUser();
-      dispatch(setEnrollments(enrollments));
-    } catch (error) {
-      console.error("Failed to fetch enrollments:", error);
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    fetchCourses();
-    fetchEnrollments();
-  }, [fetchCourses, fetchEnrollments, currentUser]);
-
-  const handleEnrollToggle = async (courseId: string, enrolled: boolean) => {
-    const enrollment = { user: currentUser._id, course: courseId };
-
-    if (enrolled) {
-      try {
-        await enrollmentsClient.unenrollUserFromCourse(currentUser._id, courseId);
-        dispatch(unenroll(enrollment));
-        await fetchEnrollments(); // Re-fetch enrollments
-        await fetchCourses(); // Re-fetch courses if needed
-      } catch (error) {
-        console.error("Failed to unenroll from course:", error);
-      }
-    } else {
-      try {
-        await enrollmentsClient.enrollUserInCourse(currentUser._id, courseId);
-        dispatch(enroll(enrollment));
-        await fetchEnrollments(); // Re-fetch enrollments
-        await fetchCourses(); // Re-fetch courses if needed
-      } catch (error) {
-        console.error("Failed to enroll in course:", error);
-      }
-    }
   };
+  useEffect(() => {
+    fetchEnrollments();
+  }, [currentUser]);
 
-  const navigateToCourse = (courseId: string) => {
-    if (isFaculty || isEnrolledInCourse(courseId)) {
+  const navigateToCourse = (courseId: string, isEnrolled: boolean) => {
+    if (isFaculty) {
       navigate(`/Kanbas/Courses/${courseId}/Home`);
     } else {
-      alert("You must be enrolled in this course to view it.");
+      if (isEnrolled) {
+        navigate(`/Kanbas/Courses/${courseId}/Home`);
+      } else {
+        alert("You must be enrolled in this course to view it.");
+      }
     }
   };
 
@@ -98,7 +70,6 @@ export default function Dashboard({
       <h1 id="wd-dashboard-title">Dashboard</h1>
       <hr />
 
-      {/* Faculty view for adding/updating courses */}
       {isFaculty && (
         <>
           <h5>
@@ -124,23 +95,24 @@ export default function Dashboard({
         </>
       )}
 
-      {/* Student toggle to view all courses or enrolled courses */}
       {!isFaculty && (
         <button
           className="btn btn-info float-end"
-          onClick={() => setViewAllCourses(!viewAllCourses)}
-        >
-          {viewAllCourses ? "View My Enrollments" : "View All Courses"}
+          onClick={() => setViewAllCourses(!viewAllCourses)}>
+          Enrollments
         </button>
       )}
 
       <hr />
-      <h2 id="wd-dashboard-published">Published Courses ({displayedCourses.length})</h2>
+      <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2>
       <hr />
 
       <div id="wd-dashboard-courses" className="row row-cols-1 row-cols-md-5 g-4">
-        {displayedCourses.map((course) => {
-          const enrolled = isEnrolledInCourse(course._id); // Use helper function
+        {courses.map((course) => {
+          const enrolled = enrollments.some(
+            (enrollment: { user: any; course: any }) =>
+              enrollment.user === currentUser._id && enrollment.course === course._id
+          );
 
           return (
             <div key={course._id} className="col" style={{ width: "300px" }}>
@@ -149,12 +121,14 @@ export default function Dashboard({
                   to={`/Kanbas/Courses/${course._id}/Home`}
                   className="wd-dashboard-course-link text-decoration-none text-dark"
                 >
-                  <img src={course.image || "/images/reactjs.jpg"} alt="Description" width="100%" height={160} />
+                  <img src={course.image || "/images/reactjs.jpg"} width="100%" height={160}/>
+                  
                   <div className="card-body">
                     <h5 className="wd-dashboard-course-title card-title">{course.name}</h5>
                     <p className="card-text overflow-y-hidden" style={{ maxHeight: 100 }}>
                       {course.description}
                     </p>
+
 
                     {!isFaculty && (
                       <button
@@ -167,12 +141,11 @@ export default function Dashboard({
                         {enrolled ? "Unenroll" : "Enroll"}
                       </button>
                     )}
-
                     <button
                       className="btn btn-primary"
                       onClick={(e) => {
                         e.preventDefault();
-                        navigateToCourse(course._id);
+                        navigateToCourse(course._id, enrolled);
                       }}
                     >
                       Go
