@@ -13,6 +13,7 @@ export default function Dashboard({
   addNewCourse,
   deleteCourse,
   updateCourse,
+  refreshCourses
 }: {
   allCourses: any[];
   courses: any[];
@@ -21,11 +22,12 @@ export default function Dashboard({
   addNewCourse: () => void;
   deleteCourse: (course: any) => void;
   updateCourse: () => void;
+  refreshCourses: () => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
   const [viewAllCourses, setViewAllCourses] = useState(false);
-
+  const displayed = viewAllCourses ? allCourses : courses;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -39,12 +41,15 @@ export default function Dashboard({
       await enrollmentClient.enrollUserInCourse(currentUser._id, courseId);
       dispatch(enroll({ user: currentUser._id, course: courseId }));
     }
+    fetchEnrollments();
+    refreshCourses();
   };
 
   const fetchEnrollments = async () => {
     try {
       const enrollments = await userClient.fetchEnrollments();
       dispatch(setEnrollments(enrollments));
+      console.log('Enrollments updated:', enrollments);
     } catch (error) {
       console.error(error);
     }
@@ -69,7 +74,6 @@ export default function Dashboard({
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1>
       <hr />
-
       {isFaculty && (
         <>
           <h5>
@@ -94,7 +98,6 @@ export default function Dashboard({
           />
         </>
       )}
-
       {!isFaculty && (
         <button
           className="btn btn-info float-end"
@@ -102,13 +105,12 @@ export default function Dashboard({
           Enrollments
         </button>
       )}
-
       <hr />
-      <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2>
+      <h2 id="wd-dashboard-published">Published Courses ({displayed.length})</h2>
       <hr />
 
       <div id="wd-dashboard-courses" className="row row-cols-1 row-cols-md-5 g-4">
-        {courses.map((course) => {
+        {displayed.map((course) => {
           const enrolled = enrollments.some(
             (enrollment: { user: any; course: any }) =>
               enrollment.user === currentUser._id && enrollment.course === course._id

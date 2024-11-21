@@ -41,6 +41,10 @@ export default function Kanbas() {
     setAllCourses(courses);
   }
   const fetchCourses = async () => {
+    if (!currentUser) {
+      setCourses([]);
+      return;
+    }
     let courses = [];
     try {
       if (currentUser.role === "FACULTY") {
@@ -53,6 +57,11 @@ export default function Kanbas() {
       console.error(error);
     }
   };
+
+  const refreshCourses = () => {
+    fetchCourses();
+  };
+  
   useEffect(() => {
     fetchCourses();
     fetchAllCourses();
@@ -76,7 +85,8 @@ export default function Kanbas() {
                   setCourse={setCourse}
                   addNewCourse={addNewCourse}
                   deleteCourse={deleteCourse}
-                  updateCourse={updateCourse} />
+                  updateCourse={updateCourse}
+                  refreshCourses={refreshCourses} />
               </ProtectedRoute>
             } />
             <Route path="/Courses/:cid/*" element={

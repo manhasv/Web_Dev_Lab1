@@ -10,9 +10,18 @@ export default function Session({ children }: { children: any }) {
       const currentUser = await client.profile();
       dispatch(setCurrentUser(currentUser));
     } catch (err: any) {
-      console.error(err);
+      // Check if the error is a 401 Unauthorized
+      if (err.response && err.response.status === 401) {
+        // User is not authenticated; set currentUser to null
+        dispatch(setCurrentUser(null));
+        console.warn("User not authenticated");
+      } else {
+        // Log other errors
+        console.error("An unexpected error occurred:", err);
+      }
+    } finally {
+      setPending(false);
     }
-    setPending(false);
   };
   useEffect(() => {
     fetchProfile();
