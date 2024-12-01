@@ -1,78 +1,47 @@
 import { Link, useNavigate } from "react-router-dom";
-import { enroll, setEnrollments, unenroll } from "./Enrollment/reducer";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import * as userClient from "./Account/client";
-import * as enrollmentClient from "./Enrollment/client";
+import { useSelector } from "react-redux";
 
 export default function Dashboard({
-  allCourses,
   courses,
   course,
   setCourse,
   addNewCourse,
   deleteCourse,
   updateCourse,
-  refreshCourses
+  enrolling,
+  setEnrolling,
+  updateEnrollment,
 }: {
-  allCourses: any[];
   courses: any[];
   course: any;
   setCourse: (course: any) => void;
   addNewCourse: () => void;
   deleteCourse: (course: any) => void;
   updateCourse: () => void;
-  refreshCourses: () => void;
+  enrolling: boolean; setEnrolling: (enrolling: boolean) => void;
+  updateEnrollment: (courseId: string, enrolled: boolean) => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
-  const [viewAllCourses, setViewAllCourses] = useState(false);
-  const displayed = viewAllCourses ? allCourses : courses;
-  const dispatch = useDispatch();
+
   const navigate = useNavigate();
 
   const isFaculty = currentUser?.role === "FACULTY";
 
-  const handleEnrollToggle = async (courseId: string, enrolled: boolean) => {
-    if (enrolled) {
-      await enrollmentClient.unenrollUserFromCourse(currentUser._id, courseId);
-      dispatch(unenroll({ user: currentUser._id, course: courseId }));
-    } else {
-      await enrollmentClient.enrollUserInCourse(currentUser._id, courseId);
-      dispatch(enroll({ user: currentUser._id, course: courseId }));
-    }
-    fetchEnrollments();
-    refreshCourses();
-  };
+  
 
-  const fetchEnrollments = async () => {
-    try {
-      const enrollments = await userClient.fetchEnrollments();
-      dispatch(setEnrollments(enrollments));
-      console.log('Enrollments updated:', enrollments);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    fetchEnrollments();
-  }, [currentUser]);
+  const navigateToCourse = (courseId: string) => {
 
-  const navigateToCourse = (courseId: string, isEnrolled: boolean) => {
-    if (isFaculty) {
       navigate(`/Kanbas/Courses/${courseId}/Home`);
-    } else {
-      if (isEnrolled) {
-        navigate(`/Kanbas/Courses/${courseId}/Home`);
-      } else {
-        alert("You must be enrolled in this course to view it.");
-      }
-    }
+    
   };
 
   return (
     <div id="wd-dashboard">
-      <h1 id="wd-dashboard-title">Dashboard</h1>
+      <h1 id="wd-dashboard-title">Dashboard
+        <button onClick={() => setEnrolling(!enrolling)} className="float-end btn btn-primary" >
+          {enrolling ? "My Courses" : "All Courses"}
+        </button>
+      </h1>
       <hr />
       {isFaculty && (
         <>
@@ -98,23 +67,14 @@ export default function Dashboard({
           />
         </>
       )}
-      {!isFaculty && (
-        <button
-          className="btn btn-info float-end"
-          onClick={() => setViewAllCourses(!viewAllCourses)}>
-          Enrollments
-        </button>
-      )}
       <hr />
-      <h2 id="wd-dashboard-published">Published Courses ({displayed.length})</h2>
+      <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2>
       <hr />
 
       <div id="wd-dashboard-courses" className="row row-cols-1 row-cols-md-5 g-4">
-        {displayed.map((course) => {
-          const enrolled = enrollments.some(
-            (enrollment: { user: any; course: any }) =>
-              enrollment.user === currentUser._id && enrollment.course === course._id
-          );
+        {courses.map((course) => 
+        {
+          
 
           return (
             <div key={course._id} className="col" style={{ width: "300px" }}>
@@ -123,31 +83,31 @@ export default function Dashboard({
                   to={`/Kanbas/Courses/${course._id}/Home`}
                   className="wd-dashboard-course-link text-decoration-none text-dark"
                 >
-                  <img src={course.image || "/images/reactjs.jpg"} width="100%" height={160}/>
-                  
+                  <img src={course.image || "/images/reactjs.jpg"} width="100%" height={160} />
+
                   <div className="card-body">
-                    <h5 className="wd-dashboard-course-title card-title">{course.name}</h5>
+                    <h5 className="wd-dashboard-course-title card-title">
+                      {enrolling && (
+                        <button onClick={(event) => {
+                          event.preventDefault();
+                          updateEnrollment(course._id, !course.enrolled);
+                        }}
+                          className={`btn ${course.enrolled ? "btn-danger" : "btn-success"} float-end`} >
+                          {course.enrolled ? "Unenroll" : "Enroll"}
+                        </button>
+                      )}
+                      {course.name}
+                    </h5>
                     <p className="card-text overflow-y-hidden" style={{ maxHeight: 100 }}>
                       {course.description}
                     </p>
 
 
-                    {!isFaculty && (
-                      <button
-                        className={`btn ${enrolled ? "btn-danger" : "btn-success"}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleEnrollToggle(course._id, enrolled);
-                        }}
-                      >
-                        {enrolled ? "Unenroll" : "Enroll"}
-                      </button>
-                    )}
                     <button
                       className="btn btn-primary"
                       onClick={(e) => {
                         e.preventDefault();
-                        navigateToCourse(course._id, enrolled);
+                        navigateToCourse(course._id);
                       }}
                     >
                       Go
