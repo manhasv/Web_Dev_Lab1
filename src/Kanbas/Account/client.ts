@@ -5,6 +5,7 @@ export const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 export const USERS_API = `${REMOTE_SERVER}/api/users`;
 
 export const signin = async (credentials: any) => {
+    console.log("Signing in");
     const response = await axiosWithCredentials.post(`${USERS_API}/signin`, credentials);
     return response.data;
 };
@@ -13,10 +14,6 @@ export const signup = async (user: any) => {
     return response.data;
 };
 
-export const updateUser = async (user: any) => {
-    const response = await axiosWithCredentials.put(`${USERS_API}/${user._id}`, user);
-    return response.data;
-};
 export const profile = async () => {
     const response = await axiosWithCredentials.post(`${USERS_API}/profile`);
     return response.data;
@@ -40,4 +37,39 @@ export const createCourse = async (course: any) => {
 export const fetchEnrollments = async () => {
     const { data } = await axiosWithCredentials.get(`${USERS_API}/current/enrollments`);
     return data;
+};
+export const findAllUsers = async () => {
+    console.log("Fetching all users");
+    const response = await axiosWithCredentials.get(USERS_API);
+    console.log(response.data);
+    return response.data;
+};
+
+export const findUsersByRole = async (role: string) => {
+    const response = await
+        axios.get(`${USERS_API}?role=${role}`);
+    return response.data;
+};
+export const findUsersByPartialName = async (name: string) => {
+    const response = await axios.get(`${USERS_API}?name=${name}`);
+    return response.data;
+};
+export const findUserById = async (id: string) => {
+    console.log("Finding user by id", id);
+    const response = await axios.get(`${USERS_API}/${id}`);
+    return response.data;
+};
+export const deleteUser = async (userId: string) => {
+    const response = await axios.delete(`${USERS_API}/${userId}`);
+    return response.data;
+};
+
+export const updateUser = async (user: any) => {
+    const response = await axiosWithCredentials.put(`${USERS_API}/${user._id}`, user);
+    return response.data;
+};
+
+export const createUser = async (user: any) => {
+    const response = await axios.post(`${USERS_API}`, user);
+    return response.data;
 };
