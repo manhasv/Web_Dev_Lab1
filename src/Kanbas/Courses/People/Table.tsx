@@ -14,7 +14,7 @@ export default function PeopleTable({ users = [] }: { users?: any[] }) {
         </thead>
         <tbody>
           {users.map((user: any) => (
-              <tr key={user._id}>
+              <tr key={`${user._id}-${user.loginId}`}>
                 <td className="wd-full-name text-nowrap">
                 <Link to={`/Kanbas/Account/Users/${user._id}`} className="text-decoration-none">
                   <FaUserCircle className="me-2 fs-1 text-secondary" />
